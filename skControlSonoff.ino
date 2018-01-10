@@ -4,7 +4,7 @@
 //#define RELE_2  2
 
 int rele1=1, rele2=1;
-int RELE_2 = 13;
+int LED = 13;
 int RELE_1 = 12;
 
 
@@ -16,12 +16,12 @@ void setup() {
  
   
   pinMode(RELE_1, OUTPUT);
-  pinMode(RELE_2, OUTPUT);
+  pinMode(LED, OUTPUT);
 
   delay(500);
 
   digitalWrite(RELE_1,LOW);
-  digitalWrite(RELE_2, LOW);
+  digitalWrite(LED, LOW);
 
   Serial.begin(115200);
   delay(500);
@@ -39,24 +39,23 @@ void setup() {
   WiFi.config(IPAddress(192, 168, 1, 46), IPAddress(192, 168, 1, 1), IPAddress(255, 255, 255, 0));
 
   int timeout = 0;
-  unsigned long startTime = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - startTime < 10000)  //10 segundos
-  {
-    Serial.write('*');
-    //Serial.print(WiFi.status());
+  while (WiFi.status() != WL_CONNECTED) {
     delay(500);
+    Serial.print("*");
+
     if (++timeout > 100)
     {
       Serial.println("Sin Conexion WIFI");
       while (1) {
-        digitalWrite(RELE_2, HIGH);
+        digitalWrite(LED, HIGH);
         delay(100);
-        digitalWrite(RELE_2, LOW);
+        digitalWrite(LED, LOW);
         delay(100);
       }
     }
 
   }
+  
   Serial.println();
 
   // Check connection
@@ -65,7 +64,7 @@ void setup() {
     // ... print IP Address
     Serial.print("IP address STATION: ");
     Serial.println(WiFi.localIP());
-    digitalWrite(RELE_2, HIGH);
+    digitalWrite(LED, HIGH);
   }
   else
   {
@@ -124,17 +123,7 @@ void loop() {
     rele1 = 1;
     Serial.print("rele1 on\r\n");
   }
-  else if (req.indexOf("rele2/off") != -1)
-  {
-    rele2 = 1;
-    Serial.print("rele2 off\r\n");
-
-  }
-  else if (req.indexOf("rele2/on") != -1) {
-
-    rele2 = 0;
-    Serial.print("rele2 on\r\n");
-  }
+  
   else
   {
 
@@ -144,7 +133,7 @@ void loop() {
   }
 
   digitalWrite(RELE_1, rele1);
-  digitalWrite(RELE_2, rele2);
+  digitalWrite(LED, ! rele1);
 
   client.flush();
 
@@ -152,8 +141,6 @@ void loop() {
   String s = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<!DOCTYPE HTML>\r\n<html>\r\n";
   s += "Rele1 "; 
   s += (rele1)  ? "on\n" :"off\n" ;
-  s += "Rele2 ";
-  s += (rele2) ? "off\n" : "on\n"; 
   s += "</html>\n";
 
 
